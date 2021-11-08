@@ -17,9 +17,20 @@ public class NetworkedClient : MonoBehaviour
     bool isConnected = false;
     int ourClientID;
 
+    GameObject gameSystemManager;
+
+
     // Start is called before the first frame update
     void Start()
     {
+        GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+
+        foreach (GameObject go in allObjects)
+        {
+            if (go.GetComponent<GameSystemFolder>() != null)
+                gameSystemManager = go;
+        }
+
         Connect();
     }
 
@@ -112,6 +123,23 @@ public class NetworkedClient : MonoBehaviour
     private void ProcessRecievedMsg(string msg, int id)
     {
         Debug.Log("msg received = " + msg + ".  connection id = " + id);
+
+        string[] csv = msg.Split(',');
+
+        int signifier = int.Parse(csv[0]);
+
+        if (signifier == ServerToClientSignifiers.AccountCreated || signifier == ServerToClientSignifiers.LoginComplete)
+        {
+            gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.MainMenu);
+        }
+        else if (signifier == ServerToClientSignifiers.OpponentPlay)
+        {
+            Debug.Log("opponent Play");
+        }
+        else if (signifier == ServerToClientSignifiers.GameStart)
+        {
+            gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.TicTacToe);
+        }
     }
 
     public bool IsConnected()
@@ -127,6 +155,8 @@ public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
     public const int Login = 2;
+    public const int JoinGameRoomQueue = 3;
+    public const int SelectedTicTacToeSquare = 4;
 }
 
 public static class ServerToClientSignifiers
@@ -136,4 +166,6 @@ public static class ServerToClientSignifiers
 
     public const int AccountCreated = 3;
     public const int AccountCreationFailed = 4;
+    public const int OpponentPlay = 5;
+    public const int GameStart = 6;
 }

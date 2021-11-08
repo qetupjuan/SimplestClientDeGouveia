@@ -537,7 +537,7 @@ GameObject:
   - component: {fileID: 321523879}
   - component: {fileID: 321523878}
   m_Layer: 5
-  m_Name: Loginbutton
+  m_Name: logIn button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -833,7 +833,7 @@ GameObject:
   - component: {fileID: 845766351}
   - component: {fileID: 845766350}
   m_Layer: 5
-  m_Name: UsernameInputField
+  m_Name: username input
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1178,7 +1178,7 @@ GameObject:
   - component: {fileID: 941105769}
   - component: {fileID: 941105768}
   m_Layer: 5
-  m_Name: PasswordInputField
+  m_Name: password input
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1565,7 +1565,7 @@ GameObject:
   - component: {fileID: 1213441942}
   - component: {fileID: 1213441941}
   m_Layer: 5
-  m_Name: GameRoombutton
+  m_Name: GameRoomButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1840,7 +1840,7 @@ GameObject:
   - component: {fileID: 1446501718}
   - component: {fileID: 1446501717}
   m_Layer: 5
-  m_Name: Text
+  m_Name: Log in text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2078,7 +2078,7 @@ GameObject:
   - component: {fileID: 1767106908}
   - component: {fileID: 1767106909}
   m_Layer: 5
-  m_Name: Toggle
+  m_Name: toggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
