@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class TicTacToeSquareBehaviour : MonoBehaviour
+public class TicTacToeSquare : MonoBehaviour
 {
     public int row, column, ID;
 
@@ -14,7 +14,7 @@ public class TicTacToeSquareBehaviour : MonoBehaviour
 
     private const int maxColumns = 3;
 
-    public delegate void SquarePressedDelegate(TicTacToeSquareBehaviour squarePressed);
+    public delegate void SquarePressedDelegate(TicTacToeSquare squarePressed);
     public event SquarePressedDelegate OnSquarePressed;
 
     private void Start()

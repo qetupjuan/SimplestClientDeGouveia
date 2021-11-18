@@ -12,7 +12,7 @@ public class NetworkedClient : MonoBehaviour
     int reliableChannelID;
     int unreliableChannelID;
     int hostID;
-    int socketPort = 54912;
+    int socketPort = 5491;
     byte error;
     bool isConnected = false;
     int ourClientID;
@@ -108,7 +108,7 @@ public class NetworkedClient : MonoBehaviour
     public void SendMessageToHost(string msg)
     {
         byte[] buffer = Encoding.Unicode.GetBytes(msg);
-        bool a = NetworkTransport.Send(hostID, connectionID, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
+        NetworkTransport.Send(hostID, connectionID, reliableChannelID, buffer, msg.Length * sizeof(char), out error);
     }
 
     private void ProcessRecievedMsg(string msg, int id)
@@ -137,15 +137,15 @@ public class NetworkedClient : MonoBehaviour
         }
         else if (signifier == ServerToClientSignifiers.OpponentLeftRoomEarly)
         {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("Oh no, the opponent left the game. uhhhh. You win!");
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":)");
         }
         else if (signifier == ServerToClientSignifiers.OpponentWonTicTacToe)
         {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("Game Over. You lost");
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":(");
         }
         else if (signifier == ServerToClientSignifiers.GameTied)
         {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("No squares left. You tied");
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":/");
         }
     }
 
@@ -153,8 +153,6 @@ public class NetworkedClient : MonoBehaviour
     {
         return isConnected;
     }
-
-
 }
 
 

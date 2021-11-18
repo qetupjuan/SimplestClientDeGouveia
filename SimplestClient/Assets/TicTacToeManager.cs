@@ -10,7 +10,7 @@ public class TicTacToeManager : MonoBehaviour
 
     NetworkedClient connectionToHost;
 
-    List<TicTacToeSquareBehaviour> ticTacToeSquares;
+    List<TicTacToeSquare> ticTacToeSquares;
 
     string playerIcon, opponentIcon;
 
@@ -23,9 +23,9 @@ public class TicTacToeManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ticTacToeSquares = new List<TicTacToeSquareBehaviour>(GetComponentsInChildren<TicTacToeSquareBehaviour>());
+        ticTacToeSquares = new List<TicTacToeSquare>(GetComponentsInChildren<TicTacToeSquare>());
 
-        foreach (TicTacToeSquareBehaviour square in ticTacToeSquares)
+        foreach (TicTacToeSquare square in ticTacToeSquares)
         {
             square.OnSquarePressed += OnTicTacToeSquarePressed;
         }
@@ -63,7 +63,7 @@ public class TicTacToeManager : MonoBehaviour
     }
 
 
-    private void OnTicTacToeSquarePressed(TicTacToeSquareBehaviour square)
+    private void OnTicTacToeSquarePressed(TicTacToeSquare square)
     {
         if (playerIcon == "" || !isPlayersTurn) //player hasn't picked their symbol yet or it isn't their turn, they cant claim a square yet
             return;
@@ -85,7 +85,7 @@ public class TicTacToeManager : MonoBehaviour
         int rowCount, colCount, diagonal1Count, diagonal2Count;
         rowCount = colCount = diagonal1Count = diagonal2Count = 0;
 
-        foreach (TicTacToeSquareBehaviour s in ticTacToeSquares)
+        foreach (TicTacToeSquare s in ticTacToeSquares)
         {
             if (s.isSquareTaken == false || s.icon == opponentIcon)
                 continue;
@@ -112,7 +112,7 @@ public class TicTacToeManager : MonoBehaviour
 
     public void OpponentTookTurn(int squareID)
     {
-        foreach (TicTacToeSquareBehaviour s in ticTacToeSquares)
+        foreach (TicTacToeSquare s in ticTacToeSquares)
         {
             if (s.ID == squareID)
                 s.ClaimSquare(opponentIcon);
@@ -165,7 +165,7 @@ public class TicTacToeManager : MonoBehaviour
         turnIndicatorText.SetActive(true);
 
         //check if the other player made a choice before your icons were set
-        foreach (TicTacToeSquareBehaviour s in ticTacToeSquares)
+        foreach (TicTacToeSquare s in ticTacToeSquares)
         {
             if (s.isSquareTaken)
                 s.ClaimSquare(opponentIcon);
@@ -183,7 +183,7 @@ public class TicTacToeManager : MonoBehaviour
     {
         if (ticTacToeSquares != null)
         {
-            foreach (TicTacToeSquareBehaviour square in ticTacToeSquares)
+            foreach (TicTacToeSquare square in ticTacToeSquares)
             {
                 square.OnSquarePressed -= OnTicTacToeSquarePressed;
             }
@@ -193,7 +193,7 @@ public class TicTacToeManager : MonoBehaviour
     private void CheckForTie()
     {
         int takenTileCount = 0;
-        foreach (TicTacToeSquareBehaviour s in ticTacToeSquares)
+        foreach (TicTacToeSquare s in ticTacToeSquares)
         {
             if (s.isSquareTaken)
                 takenTileCount++;
