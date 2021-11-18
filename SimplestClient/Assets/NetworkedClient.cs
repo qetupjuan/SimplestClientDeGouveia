@@ -12,12 +12,12 @@ public class NetworkedClient : MonoBehaviour
     int reliableChannelID;
     int unreliableChannelID;
     int hostID;
-    int socketPort = 5491;
+    int socketPort = 54912;
     byte error;
     bool isConnected = false;
     int ourClientID;
 
-    GameObject gameSystemManager;
+    GameObject gameSystemManager, ticTacToeManager;
 
 
     // Start is called before the first frame update
@@ -29,24 +29,15 @@ public class NetworkedClient : MonoBehaviour
         {
             if (go.GetComponent<GameSystemFolder>() != null)
                 gameSystemManager = go;
+            if (go.GetComponent<TicTacToeManager>() != null)
+                ticTacToeManager = go;
         }
 
         Connect();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        //if(Input.GetKeyDown(KeyCode.S))
-        //    { 
-        //        SendMessageToHost("send 1");
-        //    SendMessageToHost("send 2");
-        //    SendMessageToHost("send 3");
-
-        //    }
-
-        //if (Input.GetKeyDown(KeyCode.D))
-        //    Disconnect();
         UpdateNetworkConnection();
     }
 
@@ -97,7 +88,7 @@ public class NetworkedClient : MonoBehaviour
             hostID = NetworkTransport.AddHost(topology, 0);
             Debug.Log("Socket open.  Host ID = " + hostID);
 
-            connectionID = NetworkTransport.Connect(hostID, "192.168.2.17", socketPort, 0, out error); // server is local on network
+            connectionID = NetworkTransport.Connect(hostID, "192.168.2.23", socketPort, 0, out error); // server is local on network
 
             if (error == 0)
             {
@@ -132,13 +123,29 @@ public class NetworkedClient : MonoBehaviour
         {
             gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.MainMenu);
         }
-        else if (signifier == ServerToClientSignifiers.OpponentPlay)
-        {
-            Debug.Log("opponent Play");
-        }
         else if (signifier == ServerToClientSignifiers.GameStart)
         {
             gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.TicTacToe);
+        }
+        else if (signifier == ServerToClientSignifiers.ChosenAsPlayerOne)
+        {
+            ticTacToeManager.GetComponent<TicTacToeManager>().ChosenAsPlayerOne();
+        }
+        else if (signifier == ServerToClientSignifiers.OpponentChoseASquare)
+        {
+            ticTacToeManager.GetComponent<TicTacToeManager>().OpponentTookTurn(int.Parse(csv[1]));
+        }
+        else if (signifier == ServerToClientSignifiers.OpponentLeftRoomEarly)
+        {
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("Oh no, the opponent left the game. uhhhh. You win!");
+        }
+        else if (signifier == ServerToClientSignifiers.OpponentWonTicTacToe)
+        {
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("Game Over. You lost");
+        }
+        else if (signifier == ServerToClientSignifiers.GameTied)
+        {
+            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver("No squares left. You tied");
         }
     }
 
@@ -157,15 +164,21 @@ public static class ClientToServerSignifiers
     public const int Login = 2;
     public const int JoinGameRoomQueue = 3;
     public const int SelectedTicTacToeSquare = 4;
+    public const int WonTicTacToe = 5;
+    public const int GameTied = 6;
+    public const int LeavingGameRoom = 7;
 }
 
 public static class ServerToClientSignifiers
 {
     public const int LoginComplete = 1;
     public const int LoginFailed = 2;
-
     public const int AccountCreated = 3;
     public const int AccountCreationFailed = 4;
-    public const int OpponentPlay = 5;
-    public const int GameStart = 6;
+    public const int GameStart = 5;
+    public const int ChosenAsPlayerOne = 6;
+    public const int OpponentChoseASquare = 7;
+    public const int OpponentLeftRoomEarly = 8;
+    public const int OpponentWonTicTacToe = 9;
+    public const int GameTied = 10;
 }

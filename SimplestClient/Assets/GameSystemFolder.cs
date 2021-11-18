@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameSystemFolder : MonoBehaviour
 {
 
-    GameObject submitButton, userNameInput, passwordInput, toggle, ConnectionToHost, gameRoomButton, ticTacToeButton;
+    GameObject submitButton, userNameInput, passwordInput, toggle, ConnectionToHost, gameRoomButton, titleText, ticTacToeWindow, logInWindow;
     bool isNewUser = false;
 
     // Start is called before the first frame update
@@ -29,14 +29,18 @@ public class GameSystemFolder : MonoBehaviour
                 gameRoomButton = go;
             else if (go.name == "NetworkClient")
                 ConnectionToHost = go;
-            else if (go.name == "TicTacToeSquare")
-                ticTacToeButton = go;
+            else if (go.name == "Panel Title")
+                titleText = go;
+            else if (go.name == "TicTacToeWindow")
+                ticTacToeWindow = go;
+            else if (go.name == "Log In Window")
+                logInWindow = go;
         }
 
         submitButton.GetComponent<Button>().onClick.AddListener(SubmitButtonPressed);
         gameRoomButton.GetComponent<Button>().onClick.AddListener(GameRoomButtonPressed);
         toggle.GetComponent<Toggle>().onValueChanged.AddListener(NewUserTogglePressed);
-        ticTacToeButton.GetComponent<Button>().onClick.AddListener(TicTacToeButtonPressed);
+
         ChangeState(GameStates.LoginMenu);
     }
 
@@ -64,6 +68,10 @@ public class GameSystemFolder : MonoBehaviour
     public void NewUserTogglePressed(bool newValue)
     {
         isNewUser = newValue;
+        if (isNewUser)
+            titleText.GetComponent<Text>().text = "Create Account";
+        else
+            titleText.GetComponent<Text>().text = "Login";
     }
 
     private void GameRoomButtonPressed()
@@ -79,30 +87,39 @@ public class GameSystemFolder : MonoBehaviour
 
     public void ChangeState(int state)
     {
+        userNameInput.SetActive(false);
+        passwordInput.SetActive(false);
+        submitButton.SetActive(false);
+        toggle.SetActive(false);
+        gameRoomButton.SetActive(false);
+        titleText.SetActive(false);
+
+        ticTacToeWindow.SetActive(false);
+        logInWindow.SetActive(true);
+
         if (state == GameStates.LoginMenu)
         {
+            logInWindow.SetActive(true);
             submitButton.SetActive(true);
             userNameInput.SetActive(true);
             passwordInput.SetActive(true);
             toggle.SetActive(true);
-            gameRoomButton.SetActive(false);
-            ticTacToeButton.SetActive(false);
+            titleText.SetActive(true);
         }
         else if (state == GameStates.MainMenu)
         {
-            submitButton.SetActive(false);
-            userNameInput.SetActive(false);
-            passwordInput.SetActive(false);
-            toggle.SetActive(false);
+            logInWindow.SetActive(true);
             gameRoomButton.SetActive(true);
         }
         else if (state == GameStates.WaitingInQueueForOtherPlayer)
         {
+            logInWindow.SetActive(true);
             gameRoomButton.SetActive(false);
         }
         else if (state == GameStates.TicTacToe)
         {
-            ticTacToeButton.SetActive(true);
+            ticTacToeWindow.SetActive(true);
+            ticTacToeWindow.GetComponent<TicTacToeManager>().SetNetworkConnection(ConnectionToHost.GetComponent<NetworkedClient>());
         }
 
 
@@ -110,10 +127,12 @@ public class GameSystemFolder : MonoBehaviour
 
     private void OnDisable()
     {
-        submitButton.GetComponent<Button>().onClick.RemoveAllListeners();
-        gameRoomButton.GetComponent<Button>().onClick.RemoveAllListeners();
-        toggle.GetComponent<Toggle>().onValueChanged.RemoveAllListeners();
-        ticTacToeButton.GetComponent<Button>().onClick.RemoveAllListeners();
+        if (submitButton != null)
+            submitButton.GetComponent<Button>().onClick.RemoveAllListeners();
+        if (gameRoomButton != null)
+            gameRoomButton.GetComponent<Button>().onClick.RemoveAllListeners();
+        if (toggle != null)
+            toggle.GetComponent<Toggle>().onValueChanged.RemoveAllListeners();
     }
 
 
