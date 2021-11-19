@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class NetworkedClient : MonoBehaviour
 {
@@ -16,6 +18,7 @@ public class NetworkedClient : MonoBehaviour
     byte error;
     bool isConnected = false;
     int ourClientID;
+    public Text chatText = null;
 
     GameObject gameSystemManager, ticTacToeManager;
 
@@ -27,7 +30,7 @@ public class NetworkedClient : MonoBehaviour
 
         foreach (GameObject go in allObjects)
         {
-            if (go.GetComponent<GameSystemFolder>() != null)
+            if (go.GetComponent<GameSystemManager>() != null)
                 gameSystemManager = go;
             if (go.GetComponent<TicTacToeManager>() != null)
                 ticTacToeManager = go;
@@ -121,11 +124,11 @@ public class NetworkedClient : MonoBehaviour
 
         if (signifier == ServerToClientSignifiers.AccountCreated || signifier == ServerToClientSignifiers.LoginComplete)
         {
-            gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.MainMenu);
+            gameSystemManager.GetComponent<GameSystemManager>().ChangeState(GameStates.MainMenu);
         }
         else if (signifier == ServerToClientSignifiers.GameStart)
         {
-            gameSystemManager.GetComponent<GameSystemFolder>().ChangeState(GameStates.TicTacToe);
+            gameSystemManager.GetComponent<GameSystemManager>().ChangeState(GameStates.TicTacToe);
         }
         else if (signifier == ServerToClientSignifiers.ChosenAsPlayerOne)
         {
@@ -165,6 +168,7 @@ public static class ClientToServerSignifiers
     public const int WonTicTacToe = 5;
     public const int GameTied = 6;
     public const int LeavingGameRoom = 7;
+    public const int ChatLogMessage = 8;
 }
 
 public static class ServerToClientSignifiers
@@ -179,4 +183,5 @@ public static class ServerToClientSignifiers
     public const int OpponentLeftRoomEarly = 8;
     public const int OpponentWonTicTacToe = 9;
     public const int GameTied = 10;
+    public const int ChatLogMessage = 8;
 }

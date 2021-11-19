@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameSystemFolder : MonoBehaviour
+public class GameSystemManager : MonoBehaviour
 {
 
-    GameObject submitButton, userNameInput, passwordInput, toggle, ConnectionToHost, gameRoomButton, titleText, ticTacToeWindow, logInWindow;
+    GameObject submitButton, userNameInput, passwordInput, toggle, ConnectionToHost, gameRoomButton, observerButton, titleText, ticTacToeWindow, logInWindow, roomNumInput, leaveRoomButton;
     bool isNewUser = false;
 
     // Start is called before the first frame update
@@ -31,10 +31,16 @@ public class GameSystemFolder : MonoBehaviour
                 ConnectionToHost = go;
             else if (go.name == "Panel Title")
                 titleText = go;
-            else if (go.name == "TicTacToeWindow")
+            else if (go.name == "TicTacToe Window")
                 ticTacToeWindow = go;
             else if (go.name == "Log In Window")
                 logInWindow = go;
+            else if (go.name == "Observer Button")
+                observerButton = go;
+            else if (go.name == "RoomNumInputField")
+                roomNumInput = go;
+            else if (go.name == "LeaveRoomButton")
+                leaveRoomButton = go;
         }
 
         submitButton.GetComponent<Button>().onClick.AddListener(SubmitButtonPressed);
@@ -80,11 +86,6 @@ public class GameSystemFolder : MonoBehaviour
         ChangeState(GameStates.WaitingInQueueForOtherPlayer);
     }
 
-    private void TicTacToeButtonPressed()
-    {
-
-    }
-
     public void ChangeState(int state)
     {
         userNameInput.SetActive(false);
@@ -93,9 +94,12 @@ public class GameSystemFolder : MonoBehaviour
         toggle.SetActive(false);
         gameRoomButton.SetActive(false);
         titleText.SetActive(false);
+        observerButton.SetActive(false);
+        roomNumInput.SetActive(false);
+        leaveRoomButton.SetActive(false);
 
         ticTacToeWindow.SetActive(false);
-        logInWindow.SetActive(true);
+        logInWindow.SetActive(false);
 
         if (state == GameStates.LoginMenu)
         {
@@ -109,17 +113,20 @@ public class GameSystemFolder : MonoBehaviour
         else if (state == GameStates.MainMenu)
         {
             logInWindow.SetActive(true);
+            observerButton.SetActive(true);
             gameRoomButton.SetActive(true);
+            roomNumInput.SetActive(true);
         }
         else if (state == GameStates.WaitingInQueueForOtherPlayer)
         {
             logInWindow.SetActive(true);
-            gameRoomButton.SetActive(false);
+            leaveRoomButton.SetActive(true);
         }
         else if (state == GameStates.TicTacToe)
         {
             ticTacToeWindow.SetActive(true);
             ticTacToeWindow.GetComponent<TicTacToeManager>().SetNetworkConnection(ConnectionToHost.GetComponent<NetworkedClient>());
+            leaveRoomButton.SetActive(true);
         }
 
 
@@ -133,6 +140,7 @@ public class GameSystemFolder : MonoBehaviour
             gameRoomButton.GetComponent<Button>().onClick.RemoveAllListeners();
         if (toggle != null)
             toggle.GetComponent<Toggle>().onValueChanged.RemoveAllListeners();
+
     }
 
 

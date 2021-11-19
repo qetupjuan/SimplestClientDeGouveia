@@ -40,5 +40,11 @@ public class TicTacToeSquare : MonoBehaviour
         isSquareTaken = true;
         GetComponentInChildren<Text>().text = icon;
     }
+    public void ResetSquare()
+    {
+        this.icon = "";
+        isSquareTaken = false;
+        GetComponentInChildren<Text>().text = "";
+    }
 
 }
