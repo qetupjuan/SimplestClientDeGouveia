@@ -2,14 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
+
+// Create a way for user to create an account (account name and password)
+// The server should have 2 different methods for creating the account and signing in
+// When creating an account, the server will take the input strings, decode them and store them on the server side.
+// Login should require the user to input their name and password which it will send to the server to check.
+// When logging in, itll take the 2 input strings, check the list of accounts for a match and if the name and password match, send back a login succesfull notice
+
 
 public class NetworkedClient : MonoBehaviour
 {
-
-    int connectionID;
+    public int connectionID;
     int maxConnections = 1000;
     int reliableChannelID;
     int unreliableChannelID;
@@ -18,29 +22,19 @@ public class NetworkedClient : MonoBehaviour
     byte error;
     bool isConnected = false;
     int ourClientID;
-    public Text chatText = null;
-
-    GameObject gameSystemManager, ticTacToeManager;
-
 
     // Start is called before the first frame update
     void Start()
     {
-        GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
-
-        foreach (GameObject go in allObjects)
-        {
-            if (go.GetComponent<GameSystemManager>() != null)
-                gameSystemManager = go;
-            if (go.GetComponent<TicTacToeManager>() != null)
-                ticTacToeManager = go;
-        }
-
         Connect();
     }
 
+    // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.S))
+            Connect();
+
         UpdateNetworkConnection();
     }
 
@@ -69,6 +63,7 @@ public class NetworkedClient : MonoBehaviour
                     break;
                 case NetworkEventType.DisconnectEvent:
                     isConnected = false;
+                    GameSystemManager.Instance.ChangeState(GameStates.LoginMenu);
                     Debug.Log("disconnected.  " + recConnectionID);
                     break;
             }
@@ -89,6 +84,7 @@ public class NetworkedClient : MonoBehaviour
             unreliableChannelID = config.AddChannel(QosType.Unreliable);
             HostTopology topology = new HostTopology(config, maxConnections);
             hostID = NetworkTransport.AddHost(topology, 0);
+            config.DisconnectTimeout = 3000;
             Debug.Log("Socket open.  Host ID = " + hostID);
 
             connectionID = NetworkTransport.Connect(hostID, "192.168.2.23", socketPort, 0, out error); // server is local on network
@@ -116,39 +112,51 @@ public class NetworkedClient : MonoBehaviour
 
     private void ProcessRecievedMsg(string msg, int id)
     {
-        Debug.Log("msg received = " + msg + ".  connection id = " + id);
+        Debug.Log("msg recieved = " + msg + ".  connection id = " + id);
 
         string[] csv = msg.Split(',');
 
         int signifier = int.Parse(csv[0]);
 
-        if (signifier == ServerToClientSignifiers.AccountCreated || signifier == ServerToClientSignifiers.LoginComplete)
+        switch (signifier)
         {
-            gameSystemManager.GetComponent<GameSystemManager>().ChangeState(GameStates.MainMenu);
-        }
-        else if (signifier == ServerToClientSignifiers.GameStart)
-        {
-            gameSystemManager.GetComponent<GameSystemManager>().ChangeState(GameStates.TicTacToe);
-        }
-        else if (signifier == ServerToClientSignifiers.ChosenAsPlayerOne)
-        {
-            ticTacToeManager.GetComponent<TicTacToeManager>().ChosenAsPlayerOne();
-        }
-        else if (signifier == ServerToClientSignifiers.OpponentChoseASquare)
-        {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OpponentTookTurn(int.Parse(csv[1]));
-        }
-        else if (signifier == ServerToClientSignifiers.OpponentLeftRoomEarly)
-        {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":)");
-        }
-        else if (signifier == ServerToClientSignifiers.OpponentWonTicTacToe)
-        {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":(");
-        }
-        else if (signifier == ServerToClientSignifiers.GameTied)
-        {
-            ticTacToeManager.GetComponent<TicTacToeManager>().OnGameOver(":/");
+            case ServertoClientSignifiers.LoginComplete:
+                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                Debug.Log("Account Login Complete");
+                break;
+            case ServertoClientSignifiers.LoginFailed:
+                Debug.Log("Account Login Failed");
+                break;
+            case ServertoClientSignifiers.AccountCreationComplete:
+                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                Debug.Log("Account Creation Complete");
+                break;
+            case ServertoClientSignifiers.AccountCreationFailed:
+                Debug.Log("Account Creation Failed");
+                break;
+            case ServertoClientSignifiers.OpponentPlay:
+                TTTManager.Instance.UpdateSlot(int.Parse(csv[1]), csv[2]);
+                //Debug.Log(csv[1] + " " + csv[2]);
+                break;
+            case ServertoClientSignifiers.GameStart:
+                GameSystemManager.Instance.ChangeState(GameStates.Game);
+                TTTManager.Instance.player1ID = int.Parse(csv[1]);
+                TTTManager.Instance.player2ID = int.Parse(csv[2]);
+                TTTManager.Instance.startingPlayer = int.Parse(csv[3]);
+                Debug.Log("Starting player: " + TTTManager.Instance.startingPlayer);
+                TTTManager.Instance.playersTurn = TTTManager.Instance.startingPlayer;
+                TTTManager.Instance.SetupGame(int.Parse(csv[4]));
+                TTTManager.Instance.ResetBoard();
+                break;
+            case ServertoClientSignifiers.SendChatMessage:
+                GameSystemManager.Instance.chatManager.UpdateChatLog(csv[1], csv[2]);
+                break;
+            case ServertoClientSignifiers.BackToMainMenu:
+                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                break;
+            case ServertoClientSignifiers.SendReplay:
+                TTTManager.Instance.Replay(int.Parse(csv[1]), csv[2], int.Parse(csv[3]));
+                break;
         }
     }
 
@@ -158,30 +166,42 @@ public class NetworkedClient : MonoBehaviour
     }
 }
 
-
 public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
-    public const int Login = 2;
-    public const int JoinGameRoomQueue = 3;
-    public const int SelectedTicTacToeSquare = 4;
-    public const int WonTicTacToe = 5;
-    public const int GameTied = 6;
-    public const int LeavingGameRoom = 7;
-    public const int ChatLogMessage = 8;
+
+    public const int LoginAccount = 2;
+
+    public const int JoinQueue = 3;
+
+    public const int GameButtonPressed = 4;
+
+    public const int ChatMessageSent = 5;
+
+    public const int JoinAsObserver = 6;
+
+    public const int LeaveRoom = 7;
+
+    public const int GetReplay = 8;
 }
 
-public static class ServerToClientSignifiers
+public static class ServertoClientSignifiers
 {
     public const int LoginComplete = 1;
+
     public const int LoginFailed = 2;
-    public const int AccountCreated = 3;
+
+    public const int AccountCreationComplete = 3;
+
     public const int AccountCreationFailed = 4;
-    public const int GameStart = 5;
-    public const int ChosenAsPlayerOne = 6;
-    public const int OpponentChoseASquare = 7;
-    public const int OpponentLeftRoomEarly = 8;
-    public const int OpponentWonTicTacToe = 9;
-    public const int GameTied = 10;
-    public const int ChatLogMessage = 8;
+
+    public const int OpponentPlay = 5;
+
+    public const int GameStart = 6;
+
+    public const int SendChatMessage = 7;
+
+    public const int BackToMainMenu = 8;
+
+    public const int SendReplay = 9;
 }

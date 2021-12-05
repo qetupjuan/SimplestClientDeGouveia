@@ -2,208 +2,233 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class TTTManager : MonoBehaviour
 {
-    GameObject playerSymbolText, opponentSymbolText, turnIndicatorText, characterSelectionPanel, xButton, oButton;
+    [SerializeField]
+    GameObject networkedClient;
+    public List<Button> playSpaces;
+    public Text instructions;
 
-    NetworkedClient connectionToHost;
+    public int player1ID = 0;
+    public int player2ID = 0;
+    public int startingPlayer;
+    public int moveCount;
+    int replayActionIndex = 0;
 
-    List<TicTacToeSquare> ticTacToeSquares;
+    string playerIcon;
+    bool gameOver = false;
 
-    string playerIcon, opponentIcon;
+    string yourTurnText = "It's your turn.";
+    string opponentTurnText = "It's your opponent's turn.";
 
-    bool isPlayersTurn = false;
-    bool isGameOver = false;
-    bool isObserver = false;
+    public int playersTurn;
 
-    const int three = 3;
+    private static TTTManager instance;
+    public static TTTManager Instance { get { return instance; } }
 
+    private void Awake()
+    {
+        instance = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
-        ticTacToeSquares = new List<TicTacToeSquare>(GetComponentsInChildren<TicTacToeSquare>());
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
 
-        foreach (TicTacToeSquare square in ticTacToeSquares)
+        foreach (GameObject go in allObjects)
         {
-            square.OnSquarePressed += OnTicTacToeSquarePressed;
+            if (go.name == "NetworkedClient")
+                networkedClient = go;
+        }
+        for (int i = 0; i < transform.GetChild(0).childCount; i++)
+        {
+            playSpaces.Add(transform.GetChild(0).GetChild(i).GetComponent<Button>());
         }
 
-        foreach (GameObject go in FindObjectsOfType<GameObject>())
+        ResetBoard();
+    }
+
+    public void SlotPressed(int slot)
+    {
+        if (playersTurn == player1ID)
         {
-            if (go.name == "PlayerSymbolText")
-                playerSymbolText = go;
-            else if (go.name == "OpponentSymbolText")
-                opponentSymbolText = go;
-            else if (go.name == "TurnIndicatorText")
-                turnIndicatorText = go;
-            else if (go.name == "CharacterSelection")
-                characterSelectionPanel = go;
-            else if (go.name == "X Button")
-                xButton = go;
-            else if (go.name == "O Button")
-                oButton = go;
-        }
-
-
-        turnIndicatorText.SetActive(false);
-        if (isObserver)
-        {
-            characterSelectionPanel.SetActive(false);
-            opponentSymbolText.SetActive(false);
-            playerSymbolText.GetComponent<Text>().text = "You Are: Observing";
-        }
-        else
-        {
-            xButton.GetComponent<Button>().onClick.AddListener(XButtonPressed);
-            oButton.GetComponent<Button>().onClick.AddListener(OButtonPressed);
-        }
-
-    }
-
-
-    private void OnTicTacToeSquarePressed(TicTacToeSquare square)
-    {
-        if (playerIcon == "" || !isPlayersTurn) //player hasn't picked their symbol yet or it isn't their turn, they cant claim a square yet
-            return;
-
-        isPlayersTurn = false;
-        turnIndicatorText.GetComponent<Text>().text = "It's your opponent's turn";
-
-        square.ClaimSquare(playerIcon);
-        if (connectionToHost != null)
-            connectionToHost.SendMessageToHost(ClientToServerSignifiers.SelectedTicTacToeSquare + "," + square.ID);
-
-        CheckForLineOfThree(square.row, square.column);
-        CheckForTie();
-    }
-
-    //checks the row, column and two diagonals to see if theres a winning line of three
-    void CheckForLineOfThree(int rowToCheck, int colToCheck)
-    {
-        int rowCount, colCount, diagonal1Count, diagonal2Count;
-        rowCount = colCount = diagonal1Count = diagonal2Count = 0;
-
-        foreach (TicTacToeSquare s in ticTacToeSquares)
-        {
-            if (s.isSquareTaken == false || s.icon == opponentIcon)
-                continue;
-
-            if (s.row == rowToCheck)
-                rowCount++;
-            if (s.column == colToCheck)
-                colCount++;
-            if (s.diagonal1)
-                diagonal1Count++;
-            if (s.diagonal2)
-                diagonal2Count++;
-        }
-
-        if (rowCount == three || colCount == three || diagonal1Count == three || diagonal2Count == three)
-        {
-            //win
-            connectionToHost.SendMessageToHost(ClientToServerSignifiers.WonTicTacToe + "");
-            OnGameOver("You Won!");
-        }
-
-        print("rows: " + rowCount + "  col: " + colCount + "  ur-bl: " + diagonal1Count + "  tr-bl: " + diagonal2Count);
-    }
-
-    public void OpponentTookTurn(int squareID)
-    {
-        foreach (TicTacToeSquare s in ticTacToeSquares)
-        {
-            if (s.ID == squareID)
-                s.ClaimSquare(opponentIcon);
-        }
-
-        if (!isObserver)
-        {
-            isPlayersTurn = true;
-            turnIndicatorText.GetComponent<Text>().text = "It's your turn";
-        }
-    }
-
-    public void OnGameOver(string endingMsg)
-    {
-        isPlayersTurn = false;
-        isGameOver = true;
-        turnIndicatorText.GetComponent<Text>().text = endingMsg;
-
-        //enable ui for replay
-
-    }
-
-    public void SetNetworkConnection(NetworkedClient networkClient)
-    {
-        connectionToHost = networkClient;
-    }
-
-
-    void XButtonPressed()
-    {
-        CharacterSelected("X", "O");
-    }
-    void OButtonPressed()
-    {
-        CharacterSelected("O", "X");
-    }
-
-    void CharacterSelected(string symbol, string otherSymbol)
-    {
-        playerIcon = symbol;
-        opponentIcon = otherSymbol;
-
-        playerSymbolText.GetComponent<Text>().text = "You Are: " + symbol;
-        opponentSymbolText.GetComponent<Text>().text = "Opponent is: " + otherSymbol;
-
-        oButton.GetComponent<Button>().onClick.RemoveAllListeners();
-        xButton.GetComponent<Button>().onClick.RemoveAllListeners();
-
-        characterSelectionPanel.SetActive(false);
-        turnIndicatorText.SetActive(true);
-
-        //check if the other player made a choice before your icons were set
-        foreach (TicTacToeSquare s in ticTacToeSquares)
-        {
-            if (s.isSquareTaken)
-                s.ClaimSquare(opponentIcon);
-        }
-    }
-
-    public void ChosenAsPlayerOne()
-    {
-        isPlayersTurn = true;
-        turnIndicatorText.GetComponent<Text>().text = "It's your turn";
-    }
-
-    //unsubscribe from events and delegates
-    private void OnDisable()
-    {
-        if (ticTacToeSquares != null)
-        {
-            foreach (TicTacToeSquare square in ticTacToeSquares)
+            if (playerIcon != "Observer")
             {
-                square.OnSquarePressed -= OnTicTacToeSquarePressed;
+                //playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
+                networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
+                //Debug.Log(slot);
             }
         }
     }
 
-    private void CheckForTie()
+    public void UpdateSlot(int slot, string playericon)
     {
-        int takenTileCount = 0;
-        foreach (TicTacToeSquare s in ticTacToeSquares)
+        playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
+
+        playSpaces[slot].interactable = false;
+        EndTurn(playericon);
+
+    }
+
+    public void ReplaySlot(int slot, string playericon)
+    {
+        playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
+    }
+
+    public void SetupGame(int connectingID)
+    {
+        if (connectingID != player1ID && connectingID != player2ID)
         {
-            if (s.isSquareTaken)
-                takenTileCount++;
+            playerIcon = "Observer";
+            return;
+        }
+        if (startingPlayer == player1ID)
+            playerIcon = "X";
+        else
+            playerIcon = "O";
+    }
+    private void EndTurn(string currentPlayersIcon)
+    {
+        playersTurn = (playersTurn == player1ID) ? player2ID : player1ID;
+        if (playerIcon != "Observer")
+            instructions.text = (instructions.text == yourTurnText) ? opponentTurnText : yourTurnText;
+        else
+            instructions.text = "Enjoy the Show!";
+
+        //Check Row 1
+        if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[1].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Row 2
+        if (playSpaces[3].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[5].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Row 3
+        if (playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[7].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Col 1
+        if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[3].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Col 2
+        if (playSpaces[1].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[7].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Col 3
+        if (playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[5].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        //Check Left to Right Diagonal
+        if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        // Check Right to Left Diagonal
+        if (playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
+            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon)
+        {
+            GameOver(currentPlayersIcon);
+        }
+        moveCount++;
+
+        if (moveCount > 8)
+            GameOver("draw");
+
+
+    }
+
+    private void GameOver(string temp)
+    {
+        gameOver = true;
+        if (temp != "draw")
+        {
+            string wintext = "'" + temp + "'" + " Wins";
+            instructions.text = wintext;
+        }
+        else
+            instructions.text = "Game ends in a draw";
+
+        foreach (Button but in playSpaces)
+        {
+            but.interactable = false;
         }
 
-        if (takenTileCount >= 9 && isGameOver == false)
+        GameSystemManager.Instance.ChangeState(GameStates.End);
+    }
+
+    public void ResetBoard()
+    {
+        moveCount = 0;
+        replayActionIndex = 0;
+        GameSystemManager.Instance.chatManager.ResetChat();
+
+        foreach (Button but in playSpaces)
         {
-            connectionToHost.SendMessageToHost(ClientToServerSignifiers.GameTied + "");
-            OnGameOver("No squares left. You tied");
+            but.GetComponentInChildren<Text>().text = "";
+            but.interactable = true;
+        }
+
+        if (playerIcon == "Observer")
+        {
+            instructions.text = "Enjoy the Show!";
+            return;
+        }
+        if (playersTurn == player1ID)
+            instructions.text = yourTurnText;
+        else
+            instructions.text = opponentTurnText;
+    }
+
+    public void PrepBoardforReplay()
+    {
+        foreach (Button but in playSpaces)
+        {
+            but.GetComponentInChildren<Text>().text = "";
+            but.interactable = false;
         }
     }
 
+    public void Replay(int slot, string playericon, int isObserver)
+    {
+        if (isObserver == 1)
+        {
+            UpdateSlot(slot, playericon);
+        }
+        else
+        {
+            StartCoroutine(ShowReplayAction(replayActionIndex, slot, playericon));
+            replayActionIndex++;
+        }
+    }
+
+    IEnumerator ShowReplayAction(int i, int slot, string playericon)
+    {
+        yield return new WaitForSeconds(1.0f * i);
+        ReplaySlot(slot, playericon);
+    }
+
 }
+

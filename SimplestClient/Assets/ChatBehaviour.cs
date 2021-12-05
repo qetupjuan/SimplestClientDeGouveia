@@ -3,75 +3,63 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatScript : MonoBehaviour
+public class ChatBehaviour : MonoBehaviour
 {
     [SerializeField]
-    List<Text> textLines;
+    GameObject networkedClient;
 
-    public GameObject inputField, sendButton, connectionToClient;
+    public Text chatLog;
+    List<string> chatMessages;
+    [SerializeField]
+    InputField chatBox;
 
-    List<Button> prefabMessages;
-
+    private void Awake()
+    {
+        chatMessages = new List<string>();
+    }
     private void Start()
     {
-        sendButton.GetComponent<Button>().onClick.AddListener(OnSendButtonPressed);
+        chatLog.text = "";
     }
 
-    public void AddChatMessage(string msg, bool fromPlayer)
+
+    public void PrefixedMessageButtonpressed(Button pressedButton)
     {
-        //start at the top and copy the text box below itself
-        for (int i = textLines.Count - 1; i > 0; i--)
+        string msg = pressedButton.GetComponentInChildren<Text>().text;
+        networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.ChatMessageSent + "," + msg);
+    }
+
+    public void SubmitButtonPressed()
+    {
+        if (chatBox.text != "")
         {
-            textLines[i].text = textLines[i - 1].text;
-            textLines[i].alignment = textLines[i - 1].alignment;
+            string msg = chatBox.text;
+            networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.ChatMessageSent + "," + msg);
         }
-        textLines[0].text = msg;
+        chatBox.text = "";
+    }
 
-        if (fromPlayer)
+    public void UpdateChatLog(string playername, string chatMsg)
+    {
+        string newMsg = playername + ": " + chatMsg;
+        chatMessages.Add(newMsg);
+        if (chatMessages.Count > 10)
         {
-            textLines[0].alignment = TextAnchor.MiddleRight;
+            chatMessages.RemoveAt(0);
         }
-        else
+        chatLog.text = "";
+        foreach (string msg in chatMessages)
         {
-            textLines[0].alignment = TextAnchor.MiddleLeft;
-        }
-    }
-
-    void SendChatMessageToServer(string msg)
-    {
-        connectionToClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.ChatLogMessage + "," + msg);
-    }
-    public void OnPrefabMessagePressed(string msg)
-    {
-        AddChatMessage(msg, true);
-        SendChatMessageToServer(msg);
-    }
-    void OnSendButtonPressed()
-    {
-        InputField input = inputField.GetComponent<InputField>();
-        string msg = input.textComponent.text;
-        if (msg == "")
-            return;
-
-        input.text = "";
-
-        AddChatMessage(msg, true);
-        SendChatMessageToServer(msg);
-    }
-
-    void ClearAllMessages()
-    {
-        foreach (Text t in textLines)
-        {
-            t.text = "";
+            chatLog.text += msg + "\n";
         }
     }
 
-    private void OnDisable()
+    public void ResetChat()
     {
-        if (textLines != null)
+        foreach (string msg in chatMessages)
         {
-            ClearAllMessages();
+            chatMessages.Remove(msg);
         }
+        chatLog.text = "";
     }
 }
