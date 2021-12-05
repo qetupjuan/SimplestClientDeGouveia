@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 
-public class TicTacToeManager : MonoBehaviour
+public class TTTManager : MonoBehaviour
 {
     GameObject playerSymbolText, opponentSymbolText, turnIndicatorText, characterSelectionPanel, xButton, oButton;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChatScript : MonoBehaviour
+public class ChatBehaviour : MonoBehaviour
 {
     [SerializeField]
     List<Text> textLines;
