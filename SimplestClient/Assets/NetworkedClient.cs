@@ -4,13 +4,6 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Create a way for user to create an account (account name and password)
-// The server should have 2 different methods for creating the account and signing in
-// When creating an account, the server will take the input strings, decode them and store them on the server side.
-// Login should require the user to input their name and password which it will send to the server to check.
-// When logging in, itll take the 2 input strings, check the list of accounts for a match and if the name and password match, send back a login succesfull notice
-
-
 public class NetworkedClient : MonoBehaviour
 {
     public int connectionID;
