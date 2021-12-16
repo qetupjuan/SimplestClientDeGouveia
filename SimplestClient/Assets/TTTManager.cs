@@ -10,8 +10,8 @@ public class TTTManager : MonoBehaviour
     public List<Button> playSpaces;
     public Text instructions;
 
-    public int player1ID = 0;
-    public int player2ID = 0;
+    public int firstPlayer = 0;
+    public int secondPlayer = 0;
     public int startingPlayer;
     public int moveCount;
     int replayActionIndex = 0;
@@ -19,8 +19,8 @@ public class TTTManager : MonoBehaviour
     string playerIcon;
     bool gameOver = false;
 
-    string yourTurnText = "It's your turn.";
-    string opponentTurnText = "It's your opponent's turn.";
+    string yourTurnText = "Now is your turn";
+    string opponentTurnText = "Opponent is choosing";
 
     public int playersTurn;
 
@@ -45,19 +45,31 @@ public class TTTManager : MonoBehaviour
         {
             playSpaces.Add(transform.GetChild(0).GetChild(i).GetComponent<Button>());
         }
-
         ResetBoard();
     }
 
-    public void SlotPressed(int slot)
+    public void AssignRole(int connectingID)
     {
-        if (playersTurn == player1ID)
+        if (connectingID != firstPlayer && connectingID != secondPlayer)
+        {
+            playerIcon = "Observer";
+            return;
+        }
+        if (startingPlayer == firstPlayer)
+            playerIcon = "X";
+        else
+            playerIcon = "O";
+    }
+
+    public void TTTSlotPressed(int slot)
+    {
+        if (playersTurn == firstPlayer)
         {
             if (playerIcon != "Observer")
             {
-                //playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
+                playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
                 networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
-                //Debug.Log(slot);
+                Debug.Log(slot);
             }
         }
     }
@@ -65,10 +77,9 @@ public class TTTManager : MonoBehaviour
     public void UpdateSlot(int slot, string playericon)
     {
         playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
-
+        TTTSlotPressed(slot);
         playSpaces[slot].interactable = false;
-        EndTurn(playericon);
-
+        CheckIfWin(playericon);
     }
 
     public void ReplaySlot(int slot, string playericon)
@@ -76,79 +87,59 @@ public class TTTManager : MonoBehaviour
         playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
     }
 
-    public void SetupGame(int connectingID)
+    private void CheckIfWin(string currentPlayersIcon)
     {
-        if (connectingID != player1ID && connectingID != player2ID)
-        {
-            playerIcon = "Observer";
-            return;
-        }
-        if (startingPlayer == player1ID)
-            playerIcon = "X";
-        else
-            playerIcon = "O";
-    }
-    private void EndTurn(string currentPlayersIcon)
-    {
-        playersTurn = (playersTurn == player1ID) ? player2ID : player1ID;
+        playersTurn = (playersTurn == firstPlayer) ? secondPlayer : firstPlayer;
         if (playerIcon != "Observer")
             instructions.text = (instructions.text == yourTurnText) ? opponentTurnText : yourTurnText;
         else
-            instructions.text = "Enjoy the Show!";
-
-        //Check Row 1
+            instructions.text = "You have become a Watcher";
+       
         if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[1].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon) // first row
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Row 2
         if (playSpaces[3].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[5].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[5].GetComponentInChildren<Text>().text == currentPlayersIcon) // second row
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Row 3
         if (playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[7].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon) // third row
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Col 1
         if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[3].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon) // first column
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Col 2
         if (playSpaces[1].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[7].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[7].GetComponentInChildren<Text>().text == currentPlayersIcon) // second column
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Col 3
         if (playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[5].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon) // third column
         {
             GameOver(currentPlayersIcon);
         }
-        //Check Left to Right Diagonal
         if (playSpaces[0].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[8].GetComponentInChildren<Text>().text == currentPlayersIcon) // first diagonal
         {
             GameOver(currentPlayersIcon);
         }
-        // Check Right to Left Diagonal
         if (playSpaces[2].GetComponentInChildren<Text>().text == currentPlayersIcon &&
             playSpaces[4].GetComponentInChildren<Text>().text == currentPlayersIcon &&
-            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon)
+            playSpaces[6].GetComponentInChildren<Text>().text == currentPlayersIcon) // second diagonal
         {
             GameOver(currentPlayersIcon);
         }
@@ -156,8 +147,6 @@ public class TTTManager : MonoBehaviour
 
         if (moveCount > 8)
             GameOver("draw");
-
-
     }
 
     private void GameOver(string temp)
@@ -193,22 +182,13 @@ public class TTTManager : MonoBehaviour
 
         if (playerIcon == "Observer")
         {
-            instructions.text = "Enjoy the Show!";
+            instructions.text = "You have become a Watcher";
             return;
         }
-        if (playersTurn == player1ID)
+        if (playersTurn == firstPlayer)
             instructions.text = yourTurnText;
         else
             instructions.text = opponentTurnText;
-    }
-
-    public void PrepBoardforReplay()
-    {
-        foreach (Button but in playSpaces)
-        {
-            but.GetComponentInChildren<Text>().text = "";
-            but.interactable = false;
-        }
     }
 
     public void Replay(int slot, string playericon, int isObserver)
@@ -219,16 +199,15 @@ public class TTTManager : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ShowReplayAction(replayActionIndex, slot, playericon));
+            StartCoroutine(ReplaySequence(replayActionIndex, slot, playericon));
             replayActionIndex++;
         }
     }
 
-    IEnumerator ShowReplayAction(int i, int slot, string playericon)
+    IEnumerator ReplaySequence(int i, int slot, string playericon)
     {
         yield return new WaitForSeconds(1.0f * i);
         ReplaySlot(slot, playericon);
     }
-
 }
 

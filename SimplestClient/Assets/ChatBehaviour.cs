@@ -21,15 +21,13 @@ public class ChatBehaviour : MonoBehaviour
     {
         chatLog.text = "";
     }
-
-
-    public void PrefixedMessageButtonpressed(Button pressedButton)
+    public void PremadeMessagePressed(Button pressedButton)
     {
         string msg = pressedButton.GetComponentInChildren<Text>().text;
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.ChatMessageSent + "," + msg);
     }
 
-    public void SubmitButtonPressed()
+    public void SubmitPressed()
     {
         if (chatBox.text != "")
         {
@@ -39,7 +37,7 @@ public class ChatBehaviour : MonoBehaviour
         chatBox.text = "";
     }
 
-    public void UpdateChatLog(string playername, string chatMsg)
+    public void UpdatingChat(string playername, string chatMsg)
     {
         string newMsg = playername + ": " + chatMsg;
         chatMessages.Add(newMsg);

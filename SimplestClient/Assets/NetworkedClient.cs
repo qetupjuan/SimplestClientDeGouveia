@@ -87,7 +87,6 @@ public class NetworkedClient : MonoBehaviour
                 isConnected = true;
 
                 Debug.Log("Connected, id = " + connectionID);
-
             }
         }
     }
@@ -133,16 +132,16 @@ public class NetworkedClient : MonoBehaviour
                 break;
             case ServertoClientSignifiers.GameStart:
                 GameSystemManager.Instance.ChangeState(GameStates.Game);
-                TTTManager.Instance.player1ID = int.Parse(csv[1]);
-                TTTManager.Instance.player2ID = int.Parse(csv[2]);
+                TTTManager.Instance.firstPlayer = int.Parse(csv[1]);
+                TTTManager.Instance.secondPlayer = int.Parse(csv[2]);
                 TTTManager.Instance.startingPlayer = int.Parse(csv[3]);
                 Debug.Log("Starting player: " + TTTManager.Instance.startingPlayer);
                 TTTManager.Instance.playersTurn = TTTManager.Instance.startingPlayer;
-                TTTManager.Instance.SetupGame(int.Parse(csv[4]));
+                TTTManager.Instance.AssignRole(int.Parse(csv[4]));
                 TTTManager.Instance.ResetBoard();
                 break;
             case ServertoClientSignifiers.SendChatMessage:
-                GameSystemManager.Instance.chatManager.UpdateChatLog(csv[1], csv[2]);
+                GameSystemManager.Instance.chatManager.UpdatingChat(csv[1], csv[2]);
                 break;
             case ServertoClientSignifiers.BackToMainMenu:
                 GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
@@ -162,39 +161,24 @@ public class NetworkedClient : MonoBehaviour
 public static class ClientToServerSignifiers
 {
     public const int CreateAccount = 1;
-
     public const int LoginAccount = 2;
-
     public const int JoinQueue = 3;
-
     public const int GameButtonPressed = 4;
-
     public const int ChatMessageSent = 5;
-
     public const int JoinAsObserver = 6;
-
     public const int LeaveRoom = 7;
-
     public const int GetReplay = 8;
 }
 
 public static class ServertoClientSignifiers
 {
     public const int LoginComplete = 1;
-
     public const int LoginFailed = 2;
-
     public const int AccountCreationComplete = 3;
-
     public const int AccountCreationFailed = 4;
-
     public const int OpponentPlay = 5;
-
     public const int GameStart = 6;
-
     public const int SendChatMessage = 7;
-
     public const int BackToMainMenu = 8;
-
     public const int SendReplay = 9;
 }

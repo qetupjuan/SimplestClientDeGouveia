@@ -5,21 +5,18 @@ using UnityEngine.UI;
 
 public class GameSystemManager : MonoBehaviour
 {
-    [Header("Login Menu References")]
-    [SerializeField]GameObject submitButton;
-    [SerializeField]GameObject userNameInput;
-    [SerializeField]GameObject passwordInput;
-    [SerializeField]GameObject createToggle;
-    [SerializeField]GameObject loginToggle;
-    [SerializeField]GameObject loginPanel;
-    [Header("Main Menu References")]
+    [SerializeField] GameObject userNameInput;
+    [SerializeField] GameObject passwordInput;
+    [SerializeField] GameObject submitButton;
+    [SerializeField] GameObject createToggle;
+    [SerializeField] GameObject loginToggle;
+    [SerializeField] GameObject loginWindow;
     [SerializeField] GameObject joinButton;
-    [SerializeField] GameObject queuepanel;
-    [SerializeField] GameObject mainMenuPanel;
+    [SerializeField] GameObject waitWindow;
     [SerializeField] GameObject observerButton;
-    [Header("Game UI References")]
     [SerializeField] GameObject mainMenuButton;
-    [SerializeField] GameObject gamePanel;
+    [SerializeField] GameObject mainMenu;
+    [SerializeField] GameObject gameScreen;
     [SerializeField] GameObject endPanel;
 
     public ChatBehaviour chatManager;
@@ -38,10 +35,10 @@ public class GameSystemManager : MonoBehaviour
         observerButton.GetComponent<Button>().onClick.AddListener(WatchAsObserverButtonPressed);
         mainMenuButton.GetComponent<Button>().onClick.AddListener(MainMenuButtonPressed);
 
-        loginPanel.SetActive(false);
-        mainMenuPanel.SetActive(false);
-        gamePanel.SetActive(false);
-        queuepanel.SetActive(false);
+        loginWindow.SetActive(false);
+        mainMenu.SetActive(false);
+        gameScreen.SetActive(false);
+        waitWindow.SetActive(false);
         endPanel.SetActive(false);
         ChangeState(GameStates.LoginMenu);
     }
@@ -96,30 +93,29 @@ public class GameSystemManager : MonoBehaviour
         switch (newState)
         {
             case GameStates.LoginMenu:
-                mainMenuPanel.SetActive(false);
-                gamePanel.SetActive(false);
-                queuepanel.SetActive(false);
+                mainMenu.SetActive(false);
+                gameScreen.SetActive(false);
+                waitWindow.SetActive(false);
                 endPanel.SetActive(false);
-                loginPanel.SetActive(true);
+                loginWindow.SetActive(true);
                 break;
             case GameStates.MainMenu:
-                loginPanel.SetActive(false);
-                gamePanel.SetActive(false);
+                loginWindow.SetActive(false);
+                gameScreen.SetActive(false);
                 endPanel.SetActive(false);
-                mainMenuPanel.SetActive(true);
+                mainMenu.SetActive(true);
                 break;
             case GameStates.WaitingInQueue:
-                mainMenuPanel.SetActive(false);
-                queuepanel.SetActive(true);
+                mainMenu.SetActive(false);
+                waitWindow.SetActive(true);
                 break;
             case GameStates.Game:
-                mainMenuPanel.SetActive(false);
-                queuepanel.SetActive(false);
+                mainMenu.SetActive(false);
+                waitWindow.SetActive(false);
                 endPanel.SetActive(false);
-                gamePanel.SetActive(true);
+                gameScreen.SetActive(true);
                 break;
             case GameStates.End:
-                //gamePanel.SetActive(true);
                 endPanel.SetActive(true);
                 break;
         }
