@@ -77,7 +77,6 @@ public class TTTManager : MonoBehaviour
     public void UpdateSlot(int slot, string playericon)
     {
         playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
-        TTTSlotPressed(slot);
         playSpaces[slot].interactable = false;
         CheckIfWin(playericon);
     }

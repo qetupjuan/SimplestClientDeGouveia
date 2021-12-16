@@ -19,6 +19,8 @@ public class GameSystemManager : MonoBehaviour
     [SerializeField] GameObject gameScreen;
     [SerializeField] GameObject endPanel;
 
+    public TTTManager TTTmanager;
+    public NetworkedClient networkedclient;
     public ChatBehaviour chatManager;
     [SerializeField]
     GameObject networkedClient;

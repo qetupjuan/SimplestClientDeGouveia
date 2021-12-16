@@ -15,6 +15,7 @@ public class NetworkedClient : MonoBehaviour
     byte error;
     bool isConnected = false;
     int ourClientID;
+    public ChatBehaviour chatManager;
 
     // Start is called before the first frame update
     void Start()
@@ -127,6 +128,7 @@ public class NetworkedClient : MonoBehaviour
                 Debug.Log("Account Creation Failed");
                 break;
             case ServertoClientSignifiers.OpponentPlay:
+                //UpdateSlot(int.Parse(csv[1]), csv[2]);
                 TTTManager.Instance.UpdateSlot(int.Parse(csv[1]), csv[2]);
                 //Debug.Log(csv[1] + " " + csv[2]);
                 break;
@@ -141,7 +143,8 @@ public class NetworkedClient : MonoBehaviour
                 TTTManager.Instance.ResetBoard();
                 break;
             case ServertoClientSignifiers.SendChatMessage:
-                GameSystemManager.Instance.chatManager.UpdatingChat(csv[1], csv[2]);
+                //chatManager.UpdatingChat(csv[1], csv[2]);
+                chatManager.UpdatingChat(csv[1]);
                 break;
             case ServertoClientSignifiers.BackToMainMenu:
                 GameSystemManager.Instance.ChangeState(GameStates.MainMenu);

@@ -36,10 +36,9 @@ public class ChatBehaviour : MonoBehaviour
         }
         chatBox.text = "";
     }
-
-    public void UpdatingChat(string playername, string chatMsg)
+    public void UpdatingChat(string chatMsg)
     {
-        string newMsg = playername + ": " + chatMsg;
+        string newMsg = chatMsg;
         chatMessages.Add(newMsg);
         if (chatMessages.Count > 10)
         {
@@ -51,6 +50,20 @@ public class ChatBehaviour : MonoBehaviour
             chatLog.text += msg + "\n";
         }
     }
+    //public void UpdatingChat(string playername, string chatMsg)
+    //{
+    //    string newMsg = playername + ": " + chatMsg;
+    //    chatMessages.Add(newMsg);
+    //    if (chatMessages.Count > 10)
+    //    {
+    //        chatMessages.RemoveAt(0);
+    //    }
+    //    chatLog.text = "";
+    //    foreach (string msg in chatMessages)
+    //    {
+    //        chatLog.text += msg + "\n";
+    //    }
+    //}
 
     public void ResetChat()
     {
