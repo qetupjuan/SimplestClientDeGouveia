@@ -129,9 +129,8 @@ public class NetworkedClient : MonoBehaviour
                 Debug.Log("Account Creation Failed");
                 break;
             case ServertoClientSignifiers.OpponentPlay:
-                //UpdateSlot(int.Parse(csv[1]), csv[2]);
                 TTTmanager.UpdateSlot(int.Parse(csv[1]), "O", int.Parse(csv[2]) == 1);
-                Debug.Log(csv[1] + "<-csv1 csv2->" + csv[2]);
+                //Debug.Log(csv[1] + "<-csv1 csv2->" + csv[2]);
                 break;
             case ServertoClientSignifiers.GameStart:
                 gameSystemManager.ChangeState(GameStates.Game);
