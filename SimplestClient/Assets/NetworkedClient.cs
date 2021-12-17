@@ -115,14 +115,14 @@ public class NetworkedClient : MonoBehaviour
         switch (signifier)
         {
             case ServertoClientSignifiers.LoginComplete:
-                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                gameSystemManager.ChangeState(GameStates.MainMenu);
                 Debug.Log("Account Login Complete");
                 break;
             case ServertoClientSignifiers.LoginFailed:
                 Debug.Log("Account Login Failed");
                 break;
             case ServertoClientSignifiers.AccountCreationComplete:
-                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                gameSystemManager.ChangeState(GameStates.MainMenu);
                 Debug.Log("Account Creation Complete");
                 break;
             case ServertoClientSignifiers.AccountCreationFailed:
@@ -130,8 +130,8 @@ public class NetworkedClient : MonoBehaviour
                 break;
             case ServertoClientSignifiers.OpponentPlay:
                 //UpdateSlot(int.Parse(csv[1]), csv[2]);
-                TTTmanager.UpdateSlot(int.Parse(csv[1]), csv[2]);
-                //Debug.Log(csv[1] + " " + csv[2]);
+                TTTmanager.UpdateSlot(int.Parse(csv[1]), "O", int.Parse(csv[2]) == 1);
+                Debug.Log(csv[1] + "<-csv1 csv2->" + csv[2]);
                 break;
             case ServertoClientSignifiers.GameStart:
                 gameSystemManager.ChangeState(GameStates.Game);
@@ -139,7 +139,7 @@ public class NetworkedClient : MonoBehaviour
                 TTTmanager.secondPlayer = int.Parse(csv[2]);
                 TTTmanager.startingPlayer = int.Parse(csv[3]);
                 //Debug.Log("Starting player: " + TTTManager.Instance.startingPlayer);
-                TTTmanager.playersTurn = TTTManager.Instance.startingPlayer;
+                TTTmanager.playersTurn = TTTmanager.startingPlayer;
                 TTTmanager.AssignRole(int.Parse(csv[4]));
                 TTTmanager.ResetBoard();
                 break;
@@ -148,10 +148,10 @@ public class NetworkedClient : MonoBehaviour
                 chatManager.UpdatingChat(csv[1]);
                 break;
             case ServertoClientSignifiers.BackToMainMenu:
-                GameSystemManager.Instance.ChangeState(GameStates.MainMenu);
+                gameSystemManager.ChangeState(GameStates.MainMenu);
                 break;
             case ServertoClientSignifiers.SendReplay:
-                TTTManager.Instance.Replay(int.Parse(csv[1]), csv[2], int.Parse(csv[3]));
+                TTTmanager.Replay(int.Parse(csv[1]), csv[2], int.Parse(csv[3]));
                 break;
         }
     }

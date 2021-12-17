@@ -8,8 +8,8 @@ public class TTTManager : MonoBehaviour
 
     public List<Button> playSpaces;
     public Text instructions;
-    public int firstPlayer = 0;
-    public int secondPlayer = 0;
+    public int firstPlayer = 1;
+    public int secondPlayer = 2;
     public int startingPlayer;
     public int moveCount;
     int replayActionIndex = 0;
@@ -53,29 +53,42 @@ public class TTTManager : MonoBehaviour
         if (connectingID != firstPlayer && connectingID != secondPlayer)
         {
             playerIcon = "Observer";
-            return;
+            //return;
         }
-        if (startingPlayer == firstPlayer)
+        else if (connectingID == firstPlayer)
+        {
             playerIcon = "X";
+        }
         else
+        {
             playerIcon = "O";
+        }
     }
 
     public void TTTSlotPressed(int slot)
     {
         if (playerIcon != "Observer")
         {
-            playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
+            //playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
             networkedclient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
             //Debug.Log(slot);
+            //UpdateSlot(slot, playerIcon, true);
         }
     }
 
-    public void UpdateSlot(int slot, string playerIcon)
+    public void UpdateSlot(int slot, string playerIcon, bool isPlayer)
     {
-        playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
+        if (isPlayer)
+        {
+            CheckIfWin("X");
+            playSpaces[slot].GetComponentInChildren<Text>().text = "X";
+        }
+        else
+        {
+            CheckIfWin("O");
+            playSpaces[slot].GetComponentInChildren<Text>().text = "O";
+        }
         playSpaces[slot].interactable = false;
-        CheckIfWin(playerIcon);
     }
 
     public void ReplaySlot(int slot, string playericon)
@@ -190,7 +203,7 @@ public class TTTManager : MonoBehaviour
     {
         if (isObserver == 1)
         {
-            UpdateSlot(slot, playericon);
+            //UpdateSlot(slot, playericon, false);
         }
         else
         {
