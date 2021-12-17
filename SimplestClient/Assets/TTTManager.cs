@@ -63,22 +63,19 @@ public class TTTManager : MonoBehaviour
 
     public void TTTSlotPressed(int slot)
     {
-        if (playersTurn == firstPlayer)
+        if (playerIcon != "Observer")
         {
-            if (playerIcon != "Observer")
-            {
-                playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
-                networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
-                Debug.Log(slot);
-            }
+            playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
+            networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
+            Debug.Log(slot);
         }
     }
 
-    public void UpdateSlot(int slot, string playericon)
+    public void UpdateSlot(int slot, string playerIcon)
     {
-        playSpaces[slot].GetComponentInChildren<Text>().text = playericon;
+        playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
         playSpaces[slot].interactable = false;
-        CheckIfWin(playericon);
+        CheckIfWin(playerIcon);
     }
 
     public void ReplaySlot(int slot, string playericon)

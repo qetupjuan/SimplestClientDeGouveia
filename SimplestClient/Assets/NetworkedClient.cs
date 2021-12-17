@@ -16,6 +16,8 @@ public class NetworkedClient : MonoBehaviour
     bool isConnected = false;
     int ourClientID;
     public ChatBehaviour chatManager;
+    public TTTManager TTTmanager;
+    public GameSystemManager gameSystemManager;
 
     // Start is called before the first frame update
     void Start()
@@ -129,18 +131,18 @@ public class NetworkedClient : MonoBehaviour
                 break;
             case ServertoClientSignifiers.OpponentPlay:
                 //UpdateSlot(int.Parse(csv[1]), csv[2]);
-                TTTManager.Instance.UpdateSlot(int.Parse(csv[1]), csv[2]);
+                TTTmanager.UpdateSlot(int.Parse(csv[1]), csv[2]);
                 //Debug.Log(csv[1] + " " + csv[2]);
                 break;
             case ServertoClientSignifiers.GameStart:
-                GameSystemManager.Instance.ChangeState(GameStates.Game);
-                TTTManager.Instance.firstPlayer = int.Parse(csv[1]);
-                TTTManager.Instance.secondPlayer = int.Parse(csv[2]);
-                TTTManager.Instance.startingPlayer = int.Parse(csv[3]);
-                Debug.Log("Starting player: " + TTTManager.Instance.startingPlayer);
-                TTTManager.Instance.playersTurn = TTTManager.Instance.startingPlayer;
-                TTTManager.Instance.AssignRole(int.Parse(csv[4]));
-                TTTManager.Instance.ResetBoard();
+                gameSystemManager.ChangeState(GameStates.Game);
+                TTTmanager.firstPlayer = int.Parse(csv[1]);
+                TTTmanager.secondPlayer = int.Parse(csv[2]);
+                TTTmanager.startingPlayer = int.Parse(csv[3]);
+                //Debug.Log("Starting player: " + TTTManager.Instance.startingPlayer);
+                TTTmanager.playersTurn = TTTManager.Instance.startingPlayer;
+                TTTmanager.AssignRole(int.Parse(csv[4]));
+                TTTmanager.ResetBoard();
                 break;
             case ServertoClientSignifiers.SendChatMessage:
                 //chatManager.UpdatingChat(csv[1], csv[2]);
@@ -171,6 +173,8 @@ public static class ClientToServerSignifiers
     public const int JoinAsObserver = 6;
     public const int LeaveRoom = 7;
     public const int GetReplay = 8;
+    public const int PlayerMove = 9;
+
 }
 
 public static class ServertoClientSignifiers
@@ -184,4 +188,5 @@ public static class ServertoClientSignifiers
     public const int SendChatMessage = 7;
     public const int BackToMainMenu = 8;
     public const int SendReplay = 9;
+    public const int PlayerMove = 10;
 }
