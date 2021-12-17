@@ -5857,8 +5857,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkedClient: {fileID: 854318499}
-  chatLog: {fileID: 275247697}
   chatBox: {fileID: 1389365071}
+  chatLog: {fileID: 275247697}
 --- !u!114 &1474193508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6487,13 +6487,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d61d72be1f1fd414ba7908233570365a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkedClient: {fileID: 854318499}
   playSpaces: []
   instructions: {fileID: 558095972}
   firstPlayer: 0
   secondPlayer: 0
   startingPlayer: 0
   moveCount: 0
+  networkedclient: {fileID: 854318499}
+  chatManager: {fileID: 1474193505}
+  gameSystemManager: {fileID: 1065028942}
   playersTurn: 1
 --- !u!114 &1822582654
 MonoBehaviour:

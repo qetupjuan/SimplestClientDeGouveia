@@ -5,27 +5,27 @@ using UnityEngine.UI;
 
 public class TTTManager : MonoBehaviour
 {
-    [SerializeField]
-    GameObject networkedClient;
+
     public List<Button> playSpaces;
     public Text instructions;
-
     public int firstPlayer = 0;
     public int secondPlayer = 0;
     public int startingPlayer;
     public int moveCount;
     int replayActionIndex = 0;
 
-    string playerIcon;
-    bool gameOver = false;
+    public GameObject networkedclient;
+    public ChatBehaviour chatManager;
+    public GameSystemManager gameSystemManager;
+    public int playersTurn;
 
+    bool gameOver = false;
+    string playerIcon;
     string yourTurnText = "Now is your turn";
     string opponentTurnText = "Opponent is choosing";
 
-    public int playersTurn;
-
-    private static TTTManager instance;
     public static TTTManager Instance { get { return instance; } }
+    private static TTTManager instance;
 
     private void Awake()
     {
@@ -39,7 +39,7 @@ public class TTTManager : MonoBehaviour
         foreach (GameObject go in allObjects)
         {
             if (go.name == "NetworkedClient")
-                networkedClient = go;
+                networkedclient = go;
         }
         for (int i = 0; i < transform.GetChild(0).childCount; i++)
         {
@@ -66,8 +66,8 @@ public class TTTManager : MonoBehaviour
         if (playerIcon != "Observer")
         {
             playSpaces[slot].GetComponentInChildren<Text>().text = playerIcon;
-            networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
-            Debug.Log(slot);
+            networkedclient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "," + slot + "," + playerIcon);
+            //Debug.Log(slot);
         }
     }
 
@@ -160,15 +160,14 @@ public class TTTManager : MonoBehaviour
         {
             but.interactable = false;
         }
-
-        GameSystemManager.Instance.ChangeState(GameStates.End);
+        gameSystemManager.ChangeState(GameStates.End);
     }
 
     public void ResetBoard()
     {
         moveCount = 0;
         replayActionIndex = 0;
-        GameSystemManager.Instance.chatManager.ResetChat();
+        gameSystemManager.chatManager.ResetChat();
 
         foreach (Button but in playSpaces)
         {

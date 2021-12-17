@@ -28,7 +28,6 @@ public class GameSystemManager : MonoBehaviour
     private static GameSystemManager instance;
     public static GameSystemManager Instance { get { return instance; } }
 
-    // Start is called before the first frame update
     void Start()
     {
         instance = this;
@@ -43,6 +42,40 @@ public class GameSystemManager : MonoBehaviour
         waitWindow.SetActive(false);
         endPanel.SetActive(false);
         ChangeState(GameStates.LoginMenu);
+    }
+
+    public void ChangeState(int newState)
+    {
+
+        switch (newState)
+        {
+            case GameStates.LoginMenu:
+                mainMenu.SetActive(false);
+                gameScreen.SetActive(false);
+                waitWindow.SetActive(false);
+                endPanel.SetActive(false);
+                loginWindow.SetActive(true);
+                break;
+            case GameStates.MainMenu:
+                loginWindow.SetActive(false);
+                gameScreen.SetActive(false);
+                endPanel.SetActive(false);
+                mainMenu.SetActive(true);
+                break;
+            case GameStates.WaitingInQueue:
+                mainMenu.SetActive(false);
+                waitWindow.SetActive(true);
+                break;
+            case GameStates.Game:
+                mainMenu.SetActive(false);
+                waitWindow.SetActive(false);
+                endPanel.SetActive(false);
+                gameScreen.SetActive(true);
+                break;
+            case GameStates.End:
+                endPanel.SetActive(true);
+                break;
+        }
     }
 
     public void SubmitButtonPressed()
@@ -86,41 +119,6 @@ public class GameSystemManager : MonoBehaviour
     public void GameButtonPressed()
     {
         networkedClient.GetComponent<NetworkedClient>().SendMessageToHost(ClientToServerSignifiers.GameButtonPressed + "");
-        //ChangeState(GameStates.Game);
-    }
-
-    public void ChangeState(int newState)
-    {
-
-        switch (newState)
-        {
-            case GameStates.LoginMenu:
-                mainMenu.SetActive(false);
-                gameScreen.SetActive(false);
-                waitWindow.SetActive(false);
-                endPanel.SetActive(false);
-                loginWindow.SetActive(true);
-                break;
-            case GameStates.MainMenu:
-                loginWindow.SetActive(false);
-                gameScreen.SetActive(false);
-                endPanel.SetActive(false);
-                mainMenu.SetActive(true);
-                break;
-            case GameStates.WaitingInQueue:
-                mainMenu.SetActive(false);
-                waitWindow.SetActive(true);
-                break;
-            case GameStates.Game:
-                mainMenu.SetActive(false);
-                waitWindow.SetActive(false);
-                endPanel.SetActive(false);
-                gameScreen.SetActive(true);
-                break;
-            case GameStates.End:
-                endPanel.SetActive(true);
-                break;
-        }
     }
 }
 

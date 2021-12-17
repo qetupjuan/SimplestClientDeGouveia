@@ -55,7 +55,6 @@ public class NetworkedClient : MonoBehaviour
                 case NetworkEventType.DataEvent:
                     string msg = Encoding.Unicode.GetString(recBuffer, 0, dataSize);
                     ProcessRecievedMsg(msg, recConnectionID);
-                    //Debug.Log("got msg = " + msg);
                     break;
                 case NetworkEventType.DisconnectEvent:
                     isConnected = false;
@@ -174,7 +173,6 @@ public static class ClientToServerSignifiers
     public const int LeaveRoom = 7;
     public const int GetReplay = 8;
     public const int PlayerMove = 9;
-
 }
 
 public static class ServertoClientSignifiers

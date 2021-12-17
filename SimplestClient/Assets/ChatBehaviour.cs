@@ -5,13 +5,11 @@ using UnityEngine.UI;
 
 public class ChatBehaviour : MonoBehaviour
 {
-    [SerializeField]
-    GameObject networkedClient;
+    [SerializeField] GameObject networkedClient;
+    [SerializeField] InputField chatBox;
 
-    public Text chatLog;
     List<string> chatMessages;
-    [SerializeField]
-    InputField chatBox;
+    public Text chatLog;
 
     private void Awake()
     {
@@ -50,20 +48,6 @@ public class ChatBehaviour : MonoBehaviour
             chatLog.text += msg + "\n";
         }
     }
-    //public void UpdatingChat(string playername, string chatMsg)
-    //{
-    //    string newMsg = playername + ": " + chatMsg;
-    //    chatMessages.Add(newMsg);
-    //    if (chatMessages.Count > 10)
-    //    {
-    //        chatMessages.RemoveAt(0);
-    //    }
-    //    chatLog.text = "";
-    //    foreach (string msg in chatMessages)
-    //    {
-    //        chatLog.text += msg + "\n";
-    //    }
-    //}
 
     public void ResetChat()
     {
